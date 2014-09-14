@@ -23,3 +23,6 @@ debug_toolbar = DebugToolbarExtension()
 
 from flask.ext.httpauth import HTTPBasicAuth
 auth = HTTPBasicAuth()
+
+from flask.ext.openid import OpenID
+oid = OpenID()

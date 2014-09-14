@@ -8,6 +8,7 @@ from enma.extensions import (
     cache,
     db,
     login_manager,
+    oid,
     migrate,
     debug_toolbar,
 )
@@ -34,6 +35,8 @@ def register_extensions(app):
     cache.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
+    # oid.init_app(app, os.path.join(basedir, 'tmp')) # put the temp dir
+    oid.init_app(app)
     debug_toolbar.init_app(app)
     migrate.init_app(app, db)
     return None
