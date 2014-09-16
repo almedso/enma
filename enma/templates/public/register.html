@@ -1,29 +1,71 @@
 
 {% extends "layout.html" %}
 {% block content %}
+
+<script type="text/javascript">
+function set_openid(openid, pr)
+{
+    u = openid.search('<username>')
+    if (u != -1) {
+        // openid requires username
+        user = prompt('Enter your ' + pr + ' username:')
+        openid = openid.substr(0, u) + user
+    }
+    provider = document.getElementById("oid-openid");
+    provider.value = openid;
+    document.login_oid.submit();
+}
+</script>
+
 <div class="container-narrow">
   <h1>Register</h1>
-    <br/>
-    <form id="registerForm" class="form form-register" method="POST" action="" role="form">
-            {{ form.hidden_tag() }}
-            <div class="form-group">
-                {{form.username.label}}
-                {{form.username(placeholder="Username", class_="form-control")}}
-            </div>
-            <div class="form-group">
-                {{form.email.label}}
-                {{form.email(placeholder="Email", class_="form-control")}}
-            </div>
-            <div class="form-group">
-                {{form.password.label}}
-                {{form.password(placeholder="Password", class_="form-control")}}
-            </div>
-            <div class="form-group">
-                {{form.confirm.label}}
-                {{form.confirm(placeholder="Password (again)", class_="form-control")}}
-            </div>
-            <p><input class="btn btn-default btn-submit" type="submit" value="Register"></p>
+
+    <form id="login_oid" name="login_oid" method="POST" class="form">
+      {{ form_oid.csrf_token }}
+
+      <h2>Choose your OpenID provider to register</h2>
+
+        <ul class="nav nav-pills">
+        {% for pr in form_oid.providers %}
+        <li>
+        <a href="javascript:set_openid('{{pr.url}}', '{{pr.name}}');">
+             {{pr.text|safe}} </a> 
+        </li>
+        {% endfor %}
+        </ul>
+
+        <p> Is your favorite provider not among the listed providers, 
+        feel free to enter the URL of your preferred OpenId provider. </p>
+
+        <p><div class="row">
+        <div class="col-xs-10">
+        {{ form_oid.openid(size=60, class_="form-control") }}
+        </div><div class="col-xs-1">
+        {{ form_oid.go(class="btn btn-default") }}
+        </div>
+        </div></p>
     </form>
-    <p><em>Already registered?</em> Click <a href="/">here</a> to login.</p>
+
+    <h2>Or register locally</h2>
+
+    <form id="login_userpassword" method="POST" class="form">
+      {{ form_up.csrf_token }}
+
+      <p><div class="form-group">
+        {{ form_up.username(placeholder="Username", class_="form-control") }}
+      </div></p>
+      <p><div class="form-group">
+        {{ form_up.password(placeholder="Password", class_="form-control") }}
+      </div></p>
+      <div class="form-group">
+        {{form_up.confirm.label}}
+        {{form_up.confirm(placeholder="Password (again)", class_="form-control")}}
+      </div>
+
+      <p><div class="form-group">
+      {{ form_up.register(class="btn btn-default") }}
+      </div></p>
+    </form>
+
 </div>
 {% endblock %}

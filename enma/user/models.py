@@ -47,7 +47,7 @@ class Role(SurrogatePK, Model):
         db.Model.__init__(self, name=name, **kwargs)
 
     def __repr__(self):
-        return '<Role({name})>'.format(name=self.name)
+        return '{name}'.format(name=self.name)
 
     @staticmethod
     def insert_roles():
@@ -67,20 +67,26 @@ class Role(SurrogatePK, Model):
             db.session.add(role)
             db.session.commit()
 
+    @staticmethod
+    def list_of_role_names():
+        return map(lambda x: x.name, Role.query.all())
+
 
 class User(UserMixin, SurrogatePK, Model):
 
     __tablename__ = 'users'
     username = Column(db.String(80), unique=True, nullable=False)
     email = Column(db.String(80), unique=True, nullable=False)
-    #: The hashed password
+    email_validated = Column(db.Boolean(), default=False)
+
+    #: Authentication and the hashed password
     password = Column(db.String(128), nullable=True)
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=dt.datetime.utcnow)
     confirmed = db.Column(db.Boolean, default=False)
 
-    first_name = Column(db.String(30), nullable=True)
-    last_name = Column(db.String(30), nullable=True)
+    first_name = Column(db.String(40), nullable=True)
+    last_name = Column(db.String(40), nullable=True)
     active = Column(db.Boolean(), default=False)
     role_id = Column(db.Integer, db.ForeignKey('roles.id'))
 
@@ -126,6 +132,23 @@ class User(UserMixin, SurrogatePK, Model):
 
     def is_administrator(self):
         return self.can(Permission.ADMINISTRATOR)
+
+    def set_role(self, name):
+        role = Role.query.filter_by(name=name).first()
+        if not role:
+            raise Exception('Role %s does not exist' % name)
+        self.role = role
+
+    @property
+    def nickname(self):
+        return self.username.split('%')[0]
+
+    @property
+    def auth_provider(self):
+        try:
+            return self.username.split('%')[1]
+        except:
+            return 'not-set'
 
 
 class AnonymousUser(AnonymousUserMixin):

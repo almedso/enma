@@ -1,10 +1,22 @@
 from flask_wtf import Form
 from wtforms import TextField, PasswordField, HiddenField, BooleanField
 from wtforms import SubmitField, SelectField
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 from wtforms import ValidationError
 from .models import User
 from flask import flash
+
+
+class ReadonlyTextField(TextField):
+    def __call__(self, *args, **kwargs):
+        kwargs.setdefault('readonly', True)
+        return super(ReadonlyTextField, self).__call__(*args, **kwargs)
+
+
+class ReadonlyBooleanField(BooleanField):
+    def __call__(self, *args, **kwargs):
+        kwargs.setdefault('disabled', True)
+        return super(ReadonlyBooleanField, self).__call__(*args, **kwargs)
 
 
 class EmailExists(object):
@@ -23,16 +35,23 @@ class EmailExists(object):
         if user and user.email != self._exclude:
             raise ValidationError(self._message)
 
+
 class RegisterForm(Form):
+    openid_provider = ReadonlyTextField('OpenId Provider')
     username = TextField('Username',
                     validators=[DataRequired(), Length(min=3, max=25)])
     email = TextField('Email',
                     validators=[DataRequired(), Email(), EmailExists(),
                                 Length(min=6, max=40)])
+    first_name = TextField('First Name',
+                    validators=[DataRequired(), Length(min=1, max=25)])
+    last_name = TextField('Last Name',
+                    validators=[DataRequired(), Length(min=1, max=25)])
     password = PasswordField('Password',
-                                validators=[DataRequired(), Length(min=6, max=40)])
+                                validators=[Optional(), Length(min=6, max=40)])
     confirm = PasswordField('Verify password',
                 [DataRequired(), EqualTo('password', message='Passwords must match')])
+    register = SubmitField('Create Account', id='register')
 
     def __init__(self, *args, **kwargs):
         super(RegisterForm, self).__init__(*args, **kwargs)
@@ -47,6 +66,7 @@ class RegisterForm(Form):
             self.username.errors.append("Username already registered")
             return False
         return True
+
 
 class EditForm(Form):
     username = HiddenField('Username', validators=[])
@@ -122,10 +142,34 @@ class ChangePasswordForm(Form):
             return False
         return True
 
-class ReadonlyTextField(TextField):
-  def __call__(self, *args, **kwargs):
-    kwargs.setdefault('readonly', True)
-    return super(ReadonlyTextField, self).__call__(*args, **kwargs)
+
+class UserAdminForm(Form):
+    username = ReadonlyTextField('Username')
+    email = ReadonlyTextField('Email')
+    last_seen = ReadonlyTextField('Last seen')
+    created_at = ReadonlyTextField('Created at')
+    auth_provider = ReadonlyTextField('Authentication Provider')
+    email_validated = ReadonlyBooleanField('Email validated')
+    active = BooleanField('Is user active')
+    role = SelectField(u'Role', choices=[])
+    apply = SubmitField('Apply')
+
+
+    def __init__(self, roles=['SiteAdmin'], *args, **kwargs):
+        super(UserAdminForm, self).__init__(*args, **kwargs)
+        self.role.choices = map(lambda x: (x, x), roles)
+
+    def update_data(self, user=None):
+        if user:
+            self.username.data = user.username
+            self.email.data = user.email
+            self.auth_provider.data = user.auth_provider
+            self.created_at.data = user.created_at
+            self.last_seen.data = user.last_seen
+            self.email_validated.data = user.email_validated
+            self.active.data = user.active
+            self.role.data = str(user.role)
+
 
 class RestTokenForm(Form):
     token = ReadonlyTextField('Access Token')

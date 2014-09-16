@@ -7,7 +7,7 @@
 
         <form id="editForm" class="form form-register" method="POST"
               action="" role="form">
-            {{ edit_form.hidden_tag() }}
+            {{ edit_form.csrf_token }}
             {{ edit_form.username() }}
             <div class="form-group">
                 {{edit_form.firstname.label}}

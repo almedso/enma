@@ -7,8 +7,9 @@ from flask import current_app
 from flask.ext.login import login_required, current_user, logout_user
 
 from enma.decorators import permission_required
-from enma.user.models import User, Permission
-from enma.user.forms import DeleteForm, EditForm, ChangePasswordForm
+from enma.user.models import User, Permission, Role
+from enma.user.forms import DeleteForm, EditForm, ChangePasswordForm, \
+    UserAdminForm
 from enma.user.forms import RestTokenForm
 from enma.database import db
 from enma.utils import flash_errors
@@ -57,11 +58,10 @@ def delete(name):
     return render_template("users/delete.html", delete_form=delete_form )
 
 
-@blueprint.route("/profile/<name>",  methods=["GET", "POST"])
+@blueprint.route("/profile/",  methods=["GET", "POST"])
 @login_required
-def profile(name):
-    user = User.query.filter_by(id=name).first()
-    
+def profile():
+    user = current_user
     edit_form = EditForm()
     if edit_form.apply.data:
         if edit_form.validate():
@@ -80,6 +80,55 @@ def profile(name):
     edit_form.update_data(user)
 
     return render_template("users/profile.html", edit_form=edit_form)
+
+
+@blueprint.route("/edit/<name>",  methods=["GET", "POST"])
+@login_required
+def edit(name):
+    user = User.query.filter_by(id=name).first()
+
+    edit_form = EditForm()
+    if edit_form.apply.data:
+        if edit_form.validate():
+            user.first_name = edit_form.firstname.data
+            user.last_name = edit_form.lastname.data
+            if user.email != edit_form.email.data:
+                user.email_validated = False
+            user.email = edit_form.email.data
+            db.session.add(user)
+            db.session.commit()
+            if user == current_user:
+                flash('Your profile has been updated', 'info')
+            else:
+                flash('The profile of %s has been updated' % user.username,
+                      'info')
+        else:
+            flash_errors(edit_form)
+    edit_form.update_data(user)
+
+    return render_template("users/profile.html", edit_form=edit_form)
+
+
+@blueprint.route("/admin/<name>",  methods=["GET", "POST"])
+@login_required
+def admin(name):
+    user = User.query.filter_by(id=name).first()
+
+    admin_form = UserAdminForm(Role.list_of_role_names())
+
+    if admin_form.apply.data:
+        if admin_form.validate():
+            user.active = admin_form.active.data
+            user.set_role(admin_form.role.data)
+            db.session.add(user)
+            db.session.commit()
+            #flash('Users admin data has changed' % user.username, 'info')
+        else:
+            flash_errors(admin_form)
+    admin_form.update_data(user)
+
+    return render_template("users/admin.html", admin_form=admin_form)
+
 
 @blueprint.route("/password",  methods=["GET", "POST"])
 @login_required

@@ -7,23 +7,30 @@
     <thead>
     <tr>
         <th> Action </th>
-        <th> Login </th>
-        <th> Name </th>
-        <th> email </th>
         <th> Active </th>
+        <th> Role </th>
+        <th> Name </th>
+        <th> Full Name </th>
+        <th> Email </th>
+        <th> Email Validated</th>
+        <th> Authentication Provider </th>
     </tr>
     </thead>
     <tbody>
     {% for user in users %}
         <tr>
             <td>
-            <a href="{{ url_for('user.profile', name=user.id) }}"><i class="fa fa-edit"></i></a>
+            <a href="{{ url_for('user.edit', name=user.id) }}"><i class="fa fa-edit"></i></a>
+            <a href="{{ url_for('user.admin', name=user.id) }}"><i class="fa fa-asterisk"></i></a>
             <a href="{{ url_for('user.delete', name=user.id) }}"><i class="fa fa-trash-o"></i></a>
             </td>
-            <td> {{ user.username }} </td>
+            <td> {{ user.active }} </td>
+            <td> {{ user.role }} </td>
+            <td> {{ user.nickname }} </td>
             <td> {{ user.full_name }} </td>
             <td> {{ user.email }} </td>
-            <td> {{ user.active }} </td>
+            <td> {{ user.email_valid }} </td>
+            <td> {{ user.auth_provider }} </td>
         </tr>
     {% endfor %}
     </tbody>

@@ -1,0 +1,53 @@
+
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="container-narrow">
+
+        <h1 class="page-header"><i class="fa fa-asterisk"></i>
+        User Admin Data</h1>
+
+        <form id="adminForm" class="form" method="POST"
+              action="" role="form">
+            {{ admin_form.csrf_token }}
+
+            <div class="form-group">
+                {{admin_form.username.label}}
+                {{admin_form.username(class_="form-control")}}
+            </div>
+            <div class="form-group">
+                {{admin_form.auth_provider.label}}
+                {{admin_form.auth_provider(class_="form-control")}}
+            </div>
+
+            <div class="form-group">
+                {{admin_form.last_seen.label}}
+                {{admin_form.last_seen(class_="form-control")}}
+            </div>
+            <div class="form-group">
+                {{admin_form.created_at.label}}
+                {{admin_form.created_at(class_="form-control")}}
+            </div>
+            <div class="form-group">
+                {{admin_form.email.label}}
+                {{admin_form.email(class_="form-control")}}
+            </div>
+            <div>
+                <label class="checkbox-inline">
+                    {{admin_form.email_validated }}
+                    {{admin_form.email_validated.label }}
+                </label>
+                <label class="checkbox-inline">
+                    {{admin_form.active}}
+                    {{admin_form.active.label }}
+                </label>
+            </div>
+            <div class="form-group">
+                {{admin_form.role.label}}
+                {{admin_form.role(class_="form-control")}}
+            </div>
+            {{admin_form.apply(class_="btn btn-default btn-submit")}}
+        </form>
+
+    </div>
+{% endblock %}

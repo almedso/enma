@@ -7,10 +7,12 @@ from flask.ext.login import login_user, login_required, logout_user
 
 from enma.extensions import login_manager, oid
 from enma.user.models import User, AnonymousUser
-from enma.public.forms import LoginUserPasswordForm, LoginOpenIdForm
-from enma.user.forms import RegisterForm
+from enma.public.forms import LoginUserPasswordForm, LoginOpenIdForm, \
+    RegisterUserPasswordForm
 from enma.utils import flash_errors
 from enma.database import db
+
+from enma.public.domain import get_first_last_name, compose_username
 
 blueprint = Blueprint('public', __name__, static_folder="../static")
 
@@ -46,40 +48,50 @@ def after_login(resp):
     action = 'login'  # selector of what kind or processing is required
     if 'action' in session:
         action = session['action']
-    if resp.email is None:
-        flash('Invalid credentials. Please try again.', category="warning")
-        return redirect(url_for('public.login'))
-    user = User.query.filter_by(email=resp.email).first()
+        session.pop('action', None)
+
     openid_provider = 'local'
     if 'openid_provider' in session:
         openid_provider = session['openid_provider']
 
+    username = compose_username(resp.nickname, resp.email, openid_provider)
+    if not username:
+        flash('Invalid credentials. Please try again.', category="warning")
+        return redirect(url_for('public.login'))
+
+    user = User.query.filter_by(username=username).first()
+
     if action == 'login':
-        flash('DEBUG: This is login')
-        if user is None or user.openid_provider != openid_provider:
+        if user is None:
             # user unknown
-            flash('Invalid login. Please try again.', category="warning")
+            flash('Invalid login. Please try again.', "warning")
             return redirect(url_for('public.login'))
+        if not user.active:
+            flash('Your account is not activated - ask your administrator',
+                  'warning')
+            return redirect(url_for('public.login'))
+        flash("You are logged in.", "info")
+        redirect_url = url_for("user.home")
 
     if action == 'register':
-        flash('DEBUG: This is register')
         # either registration or profile change
-        if user is None and False:
-            nickname = resp.nickname
-            if nickname is None or nickname == "":
-                nickname = resp.email.split('@')[0]
-            user = User(nickname = nickname, email = resp.email)
-            db.session.add(user)
-            db.session.commit()
+        if user:
+            flash('Choose another Id - user already registered', "warning")
+            return redirect(url_for('public.login'))
+        first_name, last_name = get_first_last_name(resp.fullname)
+        user = User(username=username, email=resp.email,
+                    first_name=first_name, last_name=last_name)
+        db.session.add(user)
+        db.session.commit()
+        flash("Thank you for registering. Please update your profile.", "info")
+        redirect_url = url_for("user.profile")
 
     # bind the user to the session
     remember_me = False
     if 'remember_me' in session:
         remember_me = session['remember_me']
-        session.pop('remember_me', None)
-    flash("You are logged in.", 'success')
     login_user(user, remember=remember_me)
-    return redirect(url_for("user.home"))
+    return redirect(redirect_url)
 
 
 @blueprint.route('/login/',  methods=['GET', 'POST'])
@@ -91,16 +103,21 @@ def login():
         session['remember_me'] = form_userpassword.remember_me.data
         if len(form_openid.openid.data) > 0 or form_openid.go.data:
             session['openid_provider'] = form_openid.openid.data
+            session['action'] = 'login'
             if form_openid.validate_on_submit():
                 return oid.try_login(form_openid.openid.data,
-                                     ask_for=['email'])
+                                     ask_for_optional=['email', 'nickname'])
             else:
                 flash_errors(form_openid)
         if form_userpassword.login.data:
             if form_userpassword.validate_on_submit():
+                if not form_userpassword.user.active:
+                    flash('Your account is not activated '
+                          '- ask your administrator', 'warning')
+                    return redirect(url_for('public.login'))
                 login_user(form_userpassword.user,
                            remember=form_userpassword.remember_me.data)
-                flash("You are logged in.", 'success')
+                flash("You are logged in", 'info')
                 redirect_url = request.args.get("next") or url_for("user.home")
                 return redirect(redirect_url)
             else:
@@ -112,19 +129,37 @@ def login():
 
 
 @blueprint.route("/register/", methods=['GET', 'POST'])
+@oid.loginhandler
 def register():
     form_openid = LoginOpenIdForm(request.form, prefix="oid")
-    form = RegisterForm(request.form, csrf_enabled=False)
-    if form.validate_on_submit():
-        new_user = User.create(username=form.username.data,
-                        email=form.email.data,
-                        password=form.password.data,
-                        active=True)
-        flash("Thank you for registering. You can now log in.", 'success')
-        return redirect(url_for('public.home'))
-    else:
-        flash_errors(form)
-    return render_template('public/register.html', form=form)
+    form_userpassword = RegisterUserPasswordForm(request.form, prefix="up")
+    if request.method == 'POST':
+        if len(form_openid.openid.data) > 0 or form_openid.go.data:
+            session['openid_provider'] = form_openid.openid.data
+            session['action'] = 'register'
+            if form_openid.validate_on_submit():
+                return oid.try_login(form_openid.openid.data,
+                                     ask_for_optional=['nickname',
+                                                       'email', 'fullname'])
+            else:
+                flash_errors(form_openid)
+        if form_userpassword.register.data:
+            if form_userpassword.validate_on_submit():
+                username = compose_username(form_userpassword.username.data,
+                                            None, 'local')
+                new_user = User.create(username=username,
+                                password=form_userpassword.password.data,
+                                email="test@dummy.org" , active=False)
+                login_user(new_user)
+                flash("Thank you for registering. Please update your profile.")
+                redirect_url = url_for("user.profile")
+                return redirect(redirect_url)
+            else:
+                flash_errors(form_userpassword)
+
+    return render_template('public/register.html',
+                           form_up=form_userpassword,
+                           form_oid=form_openid)
 
 
 @blueprint.route("/help/")
