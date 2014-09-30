@@ -8,6 +8,11 @@ except ImportError:
     from distutils.core import setup
 
 
+try:
+    from _version import __version__
+except ImportError:
+    __version__ = "0.1.a1"
+
 readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
@@ -21,7 +26,7 @@ test_requirements = [
 
 setup(
     name='enma',
-    version='0.1.0',
+    version=__version__,
     description='Entitlement Management WebApp',
     long_description=readme + '\n\n' + history,
     author='Volker Kempert',

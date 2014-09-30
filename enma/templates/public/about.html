@@ -14,9 +14,26 @@
         https://github.com/volker-kempert/enma </a>.
       Feel free to join/fork.
       </p>
-      <p>
-      This deployment is of version: <em>{{version}}</em>.
-      </p>
+
+      <h2>Versions</h2>
+
+      <table class="table table-striped">
+      <thead>
+      <tr>
+        <th> Package </th>
+        <th> Version </th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for (package, version) in versions %}
+        <tr>
+            <td> {{ package }} </td>
+            <td> {{ version }} </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      </table>
+
 
       <h2>Credits</h2>
 

@@ -14,6 +14,8 @@ from enma.database import db
 
 from enma.public.domain import get_first_last_name, compose_username
 
+from .version import get_version
+
 blueprint = Blueprint('public', __name__, static_folder="../static")
 
 login_manager.anonymous_user = AnonymousUser
@@ -169,7 +171,8 @@ def help():
 
 @blueprint.route("/about/")
 def about():
-    return render_template("public/about.html")
+    return render_template("public/about.html", 
+                           versions=get_version(['Flask', 'Jinja2', 'WTForms']))
 
 
 @blueprint.route("/contact/")
