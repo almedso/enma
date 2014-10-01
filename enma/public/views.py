@@ -13,6 +13,7 @@ from enma.utils import flash_errors
 from enma.database import db
 
 from enma.public.domain import get_first_last_name, compose_username
+from enma.activity.models import record_authentication, record_user
 
 from .version import get_version
 
@@ -35,6 +36,7 @@ def home():
 @blueprint.route('/logout/')
 @login_required
 def logout():
+    record_authentication('Logout')
     logout_user()
     flash('You are logged out.', 'info')
     return redirect(url_for('public.home'))
@@ -72,8 +74,6 @@ def after_login(resp):
             flash('Your account is not activated - ask your administrator',
                   'warning')
             return redirect(url_for('public.login'))
-        flash("You are logged in.", "info")
-        redirect_url = url_for("user.home")
 
     if action == 'register':
         # either registration or profile change
@@ -85,14 +85,21 @@ def after_login(resp):
                     first_name=first_name, last_name=last_name)
         db.session.add(user)
         db.session.commit()
-        flash("Thank you for registering. Please update your profile.", "info")
-        redirect_url = url_for("user.profile")
 
     # bind the user to the session
     remember_me = False
     if 'remember_me' in session:
         remember_me = session['remember_me']
     login_user(user, remember=remember_me)
+
+    if action == 'login':
+        record_authentication()
+        flash("You are logged in.", "info")
+        redirect_url = url_for("user.home")
+    if action == 'register':
+        record_user('Register', user)
+        flash("Thank you for registering. Please update your profile.", "info")
+        redirect_url = url_for("user.profile")
     return redirect(redirect_url)
 
 
@@ -120,6 +127,7 @@ def login():
                 login_user(form_userpassword.user,
                            remember=form_userpassword.remember_me.data)
                 flash("You are logged in", 'info')
+                record_authentication()
                 redirect_url = request.args.get("next") or url_for("user.home")
                 return redirect(redirect_url)
             else:
@@ -153,6 +161,8 @@ def register():
                                 password=form_userpassword.password.data,
                                 email="test@dummy.org" , active=False)
                 login_user(new_user)
+                record_user('Register', new_user)
+
                 flash("Thank you for registering. Please update your profile.")
                 redirect_url = url_for("user.profile")
                 return redirect(redirect_url)

@@ -13,6 +13,8 @@ from enma.user.forms import DeleteForm, EditForm, ChangePasswordForm, \
 from enma.user.forms import RestTokenForm
 from enma.database import db
 from enma.utils import flash_errors
+from enma.activity.models import record_priviledge, record_authentication,\
+    record_user
 
 
 blueprint = Blueprint("user", __name__, url_prefix='/users',
@@ -36,9 +38,19 @@ def members():
 
 @blueprint.route("/delete/<name>",  methods=["GET", "POST"])
 @login_required
+@permission_required(Permission.DELETE_USER)
 def delete(name):
     user = User.query.filter_by(id=name).first()
+    return _delete(user)
 
+
+@blueprint.route("/terminate", methods=["GET", "POST"])
+@login_required
+def terminate():
+    return _delete(current_user)
+
+
+def _delete(user):
     delete_form = DeleteForm(user=user, prefix='delete_form')
     if delete_form.delete.data:
         if delete_form.validate():
@@ -48,9 +60,11 @@ def delete(name):
                 # delete yourself!!!
                 logout_user()
                 flash('You are removed from the system and logged out.', 'info')
+                record_user('Terminated', user)
                 return redirect(url_for('public.home'))
             else:
                 flash("User %s deleted" % str(user.username), 'info')
+                record_user('Delete by admin', user)
                 return redirect(url_for('user.members'))
         else:
             flash_errors(delete_form)
@@ -70,11 +84,8 @@ def profile():
             user.email = edit_form.email.data
             db.session.add(user)
             db.session.commit()
-            if user == current_user:
-                flash('Your profile has been updated', 'info')
-            else:
-                flash('The profile of %s has been updated' % user.username,
-                      'info')
+            record_user('Update Profile')
+            flash('Your profile has been updated', 'info')
         else:
             flash_errors(edit_form)
     edit_form.update_data(user)
@@ -84,6 +95,7 @@ def profile():
 
 @blueprint.route("/edit/<name>",  methods=["GET", "POST"])
 @login_required
+@permission_required(Permission.UPDATE_USER)
 def edit(name):
     user = User.query.filter_by(id=name).first()
 
@@ -99,9 +111,11 @@ def edit(name):
             db.session.commit()
             if user == current_user:
                 flash('Your profile has been updated', 'info')
+                record_user('Update profile')
             else:
                 flash('The profile of %s has been updated' % user.username,
                       'info')
+                record_user('Update other user profile', acted_on=user)
         else:
             flash_errors(edit_form)
     edit_form.update_data(user)
@@ -118,11 +132,18 @@ def admin(name):
 
     if admin_form.apply.data:
         if admin_form.validate():
-            user.active = admin_form.active.data
+            if user.active != admin_form.active.data:
+                user.active = admin_form.active.data
+                if user.active:
+                    description = 'Activate'
+                else:
+                    description = 'Deactivate'
+                record_priviledge(user, description=description)
+            else:
+                record_priviledge(user)
             user.set_role(admin_form.role.data)
             db.session.add(user)
             db.session.commit()
-            #flash('Users admin data has changed' % user.username, 'info')
         else:
             flash_errors(admin_form)
     admin_form.update_data(user)
@@ -143,6 +164,7 @@ def password():
             current_user.set_password(chpwd_form.password.data)
             db.session.add(current_user)
             db.session.commit()
+            record_authentication('Change password')
             flash('Your password has been updated', 'info')
         else:
             flash_errors(chpwd_form)

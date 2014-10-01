@@ -1,0 +1,47 @@
+
+{% extends "layout.html" %}
+{% block content %}
+    <h1><i class="fa fa-clock-o"> </i> Activities </h1>
+
+    <table class="table table-striped">
+    <thead>
+    <tr>
+        <th> Timestamp </th>
+        {% if columns.actor %}
+          <th> Actor (user) </th>
+        {% endif %}
+        {% if columns.category %}
+          <th> Category </th>
+        {% endif %}
+        {% if columns.act_on %}
+          <th> Acted on (user) </th>
+        {% endif %}
+        <th> Activity </th>
+        {% if columns.origin %}
+          <th> From where (host) </th>
+        {% endif %}
+    </tr>
+    </thead>
+    <tbody>
+        {% for activity in activities %}
+        <tr>
+            <td> {{ activity.timestamp }} </td>
+            {% if columns.actor %}
+              <td> {{ activity.actor }} </td>
+            {% endif %}
+            {% if columns.category %}
+              <td> {{ activity.category }} </td>
+            {% endif %}
+            {% if columns.act_on %}
+              <td> {{ activity.acted_on }} </td>
+            {% endif %}
+            <td> {{ activity.description }} </td>
+            {% if columns.origin %}
+              <td> {{ activity.origin }} </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+
+{% endblock %}
