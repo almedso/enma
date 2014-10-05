@@ -7,6 +7,12 @@ from enma.user.models import User
 from enma.public.domain import compose_username
 
 
+class ReadonlyTextField(TextField):
+    def __call__(self, *args, **kwargs):
+        kwargs.setdefault('readonly', True)
+        return super(ReadonlyTextField, self).__call__(*args, **kwargs)
+
+
 ## Open Id provider
 OPENID_PROVIDERS = [
     {'name': 'Google', 'text': '<i class="fa fa-google-plus"></i> Google',
@@ -48,6 +54,10 @@ class LoginUserPasswordForm(Form):
             self.username.errors.append('Unknown username')
             return False
 
+        if not self.user.active:
+            self.username.errors.append('User not activated')
+            return False
+
         if not self.user.check_password(self.password.data):
             self.password.errors.append('Invalid password')
             return False
@@ -73,10 +83,11 @@ class RegisterUserPasswordForm(Form):
     def validate(self):
         initial_validation = super(RegisterUserPasswordForm, self).validate()
         if not initial_validation:
+            self.username.errors.append("Initial fail")
             return False
         username = compose_username(self.username.data, None, 'local')
         self.user = User.query.filter_by(username=username).first()
         if self.user:
-            self.username.errors.append("already registered")
+            self.username.errors.append("Username already registered")
             return False
         return True

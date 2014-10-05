@@ -3,7 +3,8 @@
 
 # Testing
 pytest
-webtest
+mock==1.0.1
+webtest==2.0.16
 factory-boy==2.4.0
 
 # Management script

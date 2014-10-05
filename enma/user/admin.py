@@ -4,11 +4,6 @@ from enma.public.domain import compose_username
 from enma.database import db
 
 
-def establish_all_roles_and_get_site_admin_role():
-    Role.insert_roles()
-    return Role.query.filter(Role.name=='SiteAdmin').first()
-
-
 def establish_admin_defaults():
     """
     Reset the password of the admin user to admin.
@@ -20,9 +15,10 @@ def establish_admin_defaults():
         admin = User(username=username, email='admin@dummy.com',
                      password='admin', active=True,
                      first_name='Site', last_name='Administrator')
-    else:
-        admin.set_password('admin')
-        admin.active = True
-    admin.role = establish_all_roles_and_get_site_admin_role() 
+    admin.set_password('admin')
+    admin.active = True
+    admin.role = Role.query.filter(Role.name=='SiteAdmin').first()
+    if not admin.role:
+        admin.role = Role('SiteAdmin', permissions=0xffffffff)
     db.session.add(admin)
     db.session.commit()

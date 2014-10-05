@@ -4,8 +4,8 @@ import datetime as dt
 
 import pytest
 
-from enma.user.models import User, Role
-from .factories import UserFactory
+from enma.user.models import User
+from tests.test_enma.factories import UserFactory
 
 @pytest.mark.usefixtures('db')
 class TestUser:
@@ -34,7 +34,6 @@ class TestUser:
         assert bool(user.username)
         assert bool(user.email)
         assert bool(user.created_at)
-        assert user.is_admin is False
         assert user.active is True
         assert user.check_password('myprecious')
 
@@ -48,10 +47,8 @@ class TestUser:
         user = UserFactory(first_name="Foo", last_name="Bar")
         assert user.full_name == "Foo Bar"
 
-    def test_roles(self):
-        role = Role(name='admin')
-        role.save()
+    def test_role(self):
         u = UserFactory()
-        u.roles.append(role)
-        u.save()
-        assert role in u.roles
+        assert u.role.name == 'User'
+        u.set_role('SiteAdmin')
+        assert u.role.name == 'SiteAdmin'

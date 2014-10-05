@@ -164,8 +164,7 @@ def register():
                 record_user('Register', new_user)
 
                 flash("Thank you for registering. Please update your profile.")
-                redirect_url = url_for("user.profile")
-                return redirect(redirect_url)
+                return redirect(url_for("user.profile"))
             else:
                 flash_errors(form_userpassword)
 

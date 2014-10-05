@@ -76,19 +76,25 @@ def record(description, category=EMPTY, acted_on=None):
     if acted_on and isinstance(acted_on, User):
         acted_on_name = acted_on.username
     # origin = request.remote_addr
-    origin = request.environ['REMOTE_ADDR']
+    origin = 'not set' 
+    if 'REMOTE_ADDR' in request.environ.keys():
+        origin = request.environ['REMOTE_ADDR']
     act = Activity(user.username, description, category, acted_on_name, origin)
     db.session.add(act)
     db.session.commit()
 
+
 def record_authentication(description='Login'):
     record(description, category=AUTHENTICATION)
+
 
 def record_priviledge(acted_on, description='Change'):
     record(description, category=PRIVILEGE, acted_on=acted_on)
 
+
 def record_api(description, acted_on=None):
     record(description, category=API, acted_on=acted_on)
+
 
 def record_user(description, acted_on=None):
         record(description, category=USER, acted_on=acted_on)

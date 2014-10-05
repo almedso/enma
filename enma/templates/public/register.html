@@ -20,7 +20,7 @@ function set_openid(openid, pr)
 <div class="container-narrow">
   <h1>Register</h1>
 
-    <form id="login_oid" name="login_oid" method="POST" class="form">
+    <form id="register_oid" name="login_oid" method="POST" class="form">
       {{ form_oid.csrf_token }}
 
       <h2>Choose your OpenID provider to register</h2>
@@ -48,7 +48,7 @@ function set_openid(openid, pr)
 
     <h2>Or register locally</h2>
 
-    <form id="login_userpassword" method="POST" class="form">
+    <form id="register_userpassword" method="POST" class="form">
       {{ form_up.csrf_token }}
 
       <p><div class="form-group">

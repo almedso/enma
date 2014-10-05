@@ -21,30 +21,27 @@ class Permission:
     CREATE_USER = 0x02
     UPDATE_USER = 0x04
     DELETE_USER = 0x08
+
     READ_ORGANIZATION = 0x10
     CREATE_ORGANIZATION = 0x20
     UPDATE_ORGANIZATION = 0x40
     DELETE_ORGANIZATION = 0x80
 
-    MANAGE_ENTITLEMENT_TYPES = 0x0100
-    CREATE_ENTITLEMENT = 0x0200
-    GRANT_ENTITLEMENT = 0x0400
-    REWOKE_ENTITLEMENT = 0x0800
-    PROLONG_ENTITLEMENT = 0x1000
-    DELETE_ENTITLEMENT = 0x2000
+    READ_ACTIVITY = 0x0100
+    DELETE_ACTIVITY = 0x0200
 
-    ADMINISTRATOR = 0xFFFF
+    ADMINISTRATOR = 0xFFFFFFFF
 
 
 class Role(SurrogatePK, Model):
     __tablename__ = 'roles'
     name = Column(db.String(80), unique=True, nullable=False)
-    default = Column(db.Boolean, default=False, index=True)
-    permissions = Column(db.Integer)
+    permissions = Column(db.Integer, default=0x00, nullable=False)
+    default = Column(db.Boolean, default=False, unique=False, nullable=True)
     users = relationship('User', backref='role', lazy='dynamic')
 
-    def __init__(self, name, **kwargs):
-        db.Model.__init__(self, name=name, **kwargs)
+    def __init__(self, *cargs, **kwargs):
+        db.Model.__init__(self, *cargs, **kwargs)
 
     def __repr__(self):
         return '{name}'.format(name=self.name)
@@ -66,6 +63,7 @@ class Role(SurrogatePK, Model):
             role.default = roles[r][1]
             db.session.add(role)
             db.session.commit()
+
 
     @staticmethod
     def list_of_role_names():
@@ -141,7 +139,10 @@ class User(UserMixin, SurrogatePK, Model):
 
     @property
     def nickname(self):
-        return self.username.split('%')[0]
+        try:
+            return self.username.split('%')[0]
+        except:
+            return self.username
 
     @property
     def auth_provider(self):

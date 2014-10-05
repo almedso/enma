@@ -5,6 +5,7 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 from wtforms import ValidationError
 from .models import User
 from flask import flash
+from enma.public.domain import compose_username
 
 
 class ReadonlyTextField(TextField):
@@ -36,38 +37,6 @@ class EmailExists(object):
             raise ValidationError(self._message)
 
 
-class RegisterForm(Form):
-    openid_provider = ReadonlyTextField('OpenId Provider')
-    username = TextField('Username',
-                    validators=[DataRequired(), Length(min=3, max=25)])
-    email = TextField('Email',
-                    validators=[DataRequired(), Email(), EmailExists(),
-                                Length(min=6, max=40)])
-    first_name = TextField('First Name',
-                    validators=[DataRequired(), Length(min=1, max=25)])
-    last_name = TextField('Last Name',
-                    validators=[DataRequired(), Length(min=1, max=25)])
-    password = PasswordField('Password',
-                                validators=[Optional(), Length(min=6, max=40)])
-    confirm = PasswordField('Verify password',
-                [DataRequired(), EqualTo('password', message='Passwords must match')])
-    register = SubmitField('Create Account', id='register')
-
-    def __init__(self, *args, **kwargs):
-        super(RegisterForm, self).__init__(*args, **kwargs)
-        self.user = None
-
-    def validate(self):
-        initial_validation = super(RegisterForm, self).validate()
-        if not initial_validation:
-            return False
-        user = User.query.filter_by(username=self.username.data).first()
-        if user:
-            self.username.errors.append("Username already registered")
-            return False
-        return True
-
-
 class EditForm(Form):
     username = HiddenField('Username', validators=[])
     firstname = TextField('First Name', validators=[DataRequired(),
@@ -85,13 +54,6 @@ class EditForm(Form):
             self.lastname.data = user.last_name
             self.email.data = user.email
 
-            
-
-    def validate(self):
-        initial_validation = super(EditForm, self).validate()
-        if not initial_validation:
-            return False
-        return True
 
 class DeleteForm(Form):
     username = HiddenField('Username', validators=[])
@@ -112,6 +74,7 @@ class DeleteForm(Form):
                 "Please confirm by setting the checkmark")
             return False
         return True
+
 
 class ChangePasswordForm(Form):
     username = HiddenField('username',)
