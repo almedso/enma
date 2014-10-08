@@ -153,6 +153,7 @@ class User(UserMixin, SurrogatePK, Model):
 
 
 class AnonymousUser(AnonymousUserMixin):
+    username = 'anonymous'
     def can(self, permissions):
         return False
 

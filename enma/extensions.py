@@ -26,3 +26,6 @@ auth = HTTPBasicAuth()
 
 from flask.ext.openid import OpenID
 oid = OpenID()
+
+from flask.ext.mail import Mail
+mail = Mail()

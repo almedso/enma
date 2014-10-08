@@ -11,6 +11,7 @@ from enma.extensions import (
     oid,
     migrate,
     debug_toolbar,
+    mail,
 )
 from enma import public, user, activity, entitlement, rest
 
@@ -39,6 +40,7 @@ def register_extensions(app):
     oid.init_app(app)
     debug_toolbar.init_app(app)
     migrate.init_app(app, db)
+    mail.init_app(app)
     return None
 
 

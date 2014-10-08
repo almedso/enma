@@ -9,7 +9,7 @@ from enma.database import (
 )
 from flask_login import current_user
 from flask import request
-from enma.user.models import User
+from enma.user.models import User, AnonymousUser
 
 """
 Limit the set of possible categories to fixed meaningful subset

@@ -32,6 +32,9 @@ Flask-Bcrypt==0.6.0
 Flask-HTTPAuth==2.2.1
 Flask-OpenId==1.2.1
 
+# Mail
+Flask-Mail==0.9.1
+
 # Caching
 Flask-Cache>=0.12
 

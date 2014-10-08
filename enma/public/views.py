@@ -96,6 +96,9 @@ def after_login(resp):
         record_authentication()
         flash("You are logged in.", "info")
         redirect_url = url_for("user.home")
+        if not user.email_validated:
+            redirect_url = url_for('user.resend_confirmation')
+
     if action == 'register':
         record_user('Register', user)
         flash("Thank you for registering. Please update your profile.", "info")
@@ -129,6 +132,8 @@ def login():
                 flash("You are logged in", 'info')
                 record_authentication()
                 redirect_url = request.args.get("next") or url_for("user.home")
+                if not form_userpassword.user.email_validated:
+                    redirect_url = url_for('user.resend_confirmation')
                 return redirect(redirect_url)
             else:
                 flash_errors(form_userpassword)

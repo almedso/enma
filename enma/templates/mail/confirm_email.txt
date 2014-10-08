@@ -1,0 +1,9 @@
+Dear {{ full_name }},
+
+
+please confirm your email address by following the attached link.
+
+{{ link }}
+
+Regards,
+Your Enma Team

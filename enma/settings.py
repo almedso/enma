@@ -13,6 +13,23 @@ class Config(object):
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     CACHE_TYPE = 'simple'  # Can be "memcached", "redis", etc.
 
+    MAIL_SERVER = 'localhost'
+    if 'MAIL_SERVER' in os_env.keys():
+        MAIL_SERVER = os_env['MAIL_SERVER']
+    MAIL_PORT = 25
+    if 'MAIL_PORT' in os_env.keys():
+        MAIL_PORT = int(os_env['MAIL_PORT'])
+    MAIL_USE_SSL = False
+    if 'MAIL_USE_SSL' in os_env.keys():
+        MAIL_USE_SSL = True
+    MAIL_USE_TLS = False
+    if 'MAIL_USE_TLS' in os_env.keys():
+        MAIL_USE_TLS = True
+    MAIL_USERNAME = os_env['MAIL_USERNAME']
+    MAIL_PASSWORD = os_env['MAIL_PASSWORD']
+    MAIL_DEFAULT_SENDER = MAIL_USERNAME
+    MAIL_SUBJECT_PREFIX = '[ENMA] '
+
 
 class ProdConfig(Config):
     """Production configuration."""

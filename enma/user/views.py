@@ -3,7 +3,7 @@ import time
 import datetime
 
 from flask import Blueprint, render_template, flash, redirect, url_for
-from flask import current_app
+from flask import current_app, request
 from flask.ext.login import login_required, current_user, logout_user
 
 from enma.decorators import permission_required
@@ -15,6 +15,7 @@ from enma.database import db
 from enma.utils import flash_errors
 from enma.activity.models import record_priviledge, record_authentication,\
     record_user
+from enma.user.mail import request_email_confirmation
 
 
 blueprint = Blueprint("user", __name__, url_prefix='/users',
@@ -81,9 +82,12 @@ def profile():
         if edit_form.validate():
             user.first_name = edit_form.firstname.data
             user.last_name = edit_form.lastname.data
+            if user.email != edit_form.email.data:
+                user.email_validated = False
             user.email = edit_form.email.data
             db.session.add(user)
             db.session.commit()
+            request_email_confirmation()
             record_user('Update Profile')
             flash('Your profile has been updated', 'info')
         else:
@@ -109,6 +113,7 @@ def edit(name):
             user.email = edit_form.email.data
             db.session.add(user)
             db.session.commit()
+            request_email_confirmation(user)
             if user == current_user:
                 flash('Your profile has been updated', 'info')
                 record_user('Update profile')
@@ -190,3 +195,40 @@ def token():
     form.expiry.data = datetime.datetime.fromtimestamp(expiry).strftime('%Y-%m-%d %H:%M:%S')
     form.token.data = current_user.generate_auth_token(expiry)
     return render_template("users/token.html", token_form=form)
+
+
+@blueprint.route("/confirm_email/<token>",  methods=["GET"])
+def confirm_email(token):
+    """
+    Confirm the email address
+    """
+
+    user = User.verify_auth_token(token)
+    if user:
+        user.email_validated = True
+        db.session.add(user)
+        db.session.commit()
+        record_user('Email address verified', acted_on=user)
+        flash('Your email has been validated', 'info')
+    else:
+        flash('This link has been expired', 'error')
+    return redirect(url_for('public.login'))
+
+
+@blueprint.route("/unconfirmed",  methods=["GET"])
+@blueprint.route("/unconfirmed/<flag>",  methods=["GET"])
+@login_required
+def resend_confirmation(flag='info'):
+    """
+    Offer the ability to resent an email to confirm the email address
+    """
+    if 'resend' == flag:
+        request_email_confirmation()
+        redirect_url = request.args.get("next") or url_for("public.logout")
+        flash('A new new confirmation email has been sent', 'info')
+        return redirect(redirect_url)
+    return render_template("users/request_confirmation_email.html",
+                           full_name=current_user.full_name)
+
+
+
