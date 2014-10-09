@@ -1,7 +1,10 @@
 
 {% extends "layout.html" %}
+{% import "pagination.html" as macro %}
+
 {% block content %}
     <h1><i class="fa fa-clock-o"> </i> Activities </h1>
+
 
     <table class="table table-striped">
     <thead>
@@ -27,13 +30,13 @@
         <tr>
             <td> {{ activity.timestamp }} </td>
             {% if columns.actor %}
-              <td> {{ activity.actor }} </td>
+              <td> {{ activity.actor.replace('%', ' ') }} </td>
             {% endif %}
             {% if columns.category %}
               <td> {{ activity.category }} </td>
             {% endif %}
             {% if columns.act_on %}
-              <td> {{ activity.acted_on }} </td>
+              <td> {{ activity.acted_on.replace('%', ' ') }} </td>
             {% endif %}
             <td> {{ activity.description }} </td>
             {% if columns.origin %}
@@ -43,5 +46,9 @@
         {% endfor %}
     </tbody>
     </table>
+
+    <div class="pagination">
+      {{ macro.pagination_widget(pagination, 'activity.home') }}
+    </div>
 
 {% endblock %}
