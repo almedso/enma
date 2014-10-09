@@ -147,3 +147,12 @@ class RestTokenForm(Form):
 
     def update_data(self, user):
         pass
+
+
+class SetPasswordForm(Form):
+    password = PasswordField('Password',
+                        validators=[DataRequired(), Length(min=6, max=40)])
+    confirm = PasswordField('Verify password',
+                [DataRequired(), EqualTo('password',
+                                          message='Passwords must match')])
+    setpwd = SubmitField('Set Password')

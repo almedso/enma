@@ -9,7 +9,7 @@ from flask.ext.login import login_required, current_user, logout_user
 from enma.decorators import permission_required
 from enma.user.models import User, Permission, Role
 from enma.user.forms import DeleteForm, EditForm, ChangePasswordForm, \
-    UserAdminForm
+    UserAdminForm, SetPasswordForm
 from enma.user.forms import RestTokenForm
 from enma.database import db
 from enma.utils import flash_errors
@@ -229,6 +229,29 @@ def resend_confirmation(flag='info'):
         return redirect(redirect_url)
     return render_template("users/request_confirmation_email.html",
                            full_name=current_user.full_name)
+
+
+@blueprint.route("/forgotten_password/<token>",  methods=["GET", "POST"])
+def set_password(token):
+    """
+    Set the password after it was forgotten
+    """
+    user = User.verify_auth_token(token)
+    if None == user:
+        flash('This link has been expired', 'error')
+        return redirect(url_for('public.login'))
+    else:
+        form = SetPasswordForm()
+        if form.validate_on_submit():
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.commit()
+            record_user('Reset password', acted_on=user)
+            flash('Your password has been set', 'info')
+            return redirect(url_for("public.login"))
+        else:
+            flash_errors(form)
+        return render_template("users/set_password.html", form=form)
 
 
 

@@ -91,3 +91,30 @@ class RegisterUserPasswordForm(Form):
             self.username.errors.append("Username already registered")
             return False
         return True
+
+
+class RequestPasswordChangeForm(Form):
+
+    username = TextField('Username',
+                    validators=[DataRequired(), Length(min=3, max=25)])
+    request = SubmitField('Request')
+
+    def __init__(self, *args, **kwargs):
+        super(RequestPasswordChangeForm, self).__init__(*args, **kwargs)
+        self.user = None
+
+    def validate(self):
+        initial_validation = super(RequestPasswordChangeForm, self).validate()
+        if not initial_validation:
+            return False
+        username = compose_username(self.username.data, None, 'local')
+        self.user = User.query.filter_by(username=username).first()
+        if not self.user:
+            self.username.errors.append('Unknown username')
+            return False
+
+        if not self.user.active:
+            self.username.errors.append('User not activated')
+            return False
+
+        return True

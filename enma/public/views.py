@@ -8,12 +8,13 @@ from flask.ext.login import login_user, login_required, logout_user
 from enma.extensions import login_manager, oid
 from enma.user.models import User, AnonymousUser
 from enma.public.forms import LoginUserPasswordForm, LoginOpenIdForm, \
-    RegisterUserPasswordForm
+    RegisterUserPasswordForm, RequestPasswordChangeForm
 from enma.utils import flash_errors
 from enma.database import db
 
 from enma.public.domain import get_first_last_name, compose_username
 from enma.activity.models import record_authentication, record_user
+from enma.user.mail import send_reset_password_link
 
 from .version import get_version
 
@@ -176,6 +177,21 @@ def register():
     return render_template('public/register.html',
                            form_up=form_userpassword,
                            form_oid=form_openid)
+
+
+@blueprint.route('/forgotten/',  methods=['GET', 'POST'])
+@oid.loginhandler
+def forgotten_password():
+    form = RequestPasswordChangeForm(request.form)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            send_reset_password_link(form.user)
+            flash("We have sent you an email containing"
+                  " a link to reset your password", 'info')
+            return redirect(url_for('public.home'))
+        else:
+            flash_errors(form)
+    return render_template('public/forgotten_password.html', form=form)
 
 
 @blueprint.route("/help/")

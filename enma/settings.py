@@ -59,7 +59,7 @@ class DevConfig(Config):
 
 
 class TestConfig(Config):
-    TESTING = True
+    TESTING = True  # also suppresses sending emails
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
     BCRYPT_LOG_ROUNDS = 1  # For faster tests

@@ -46,10 +46,10 @@ def request_email_confirmation(user=None):
     By sending this email and urging the user to click the contained
     link the email address gets tested if it is a working/valid one.
     @param user The user object that will be addressed. If not given
-           the current user is used.
+           the current user is used. The user must not be anonymous.
     """
     if None == user:
-        user = current_user
+        user = current_user  # current user must not be anonymous
     if not user.email_validated:
         record_user('Request email address confirmation')
 
@@ -62,3 +62,20 @@ def generate_email_confirm_url(user):
     expiry = time.time() +  3600 * 48  # two days valid
     token = user.generate_auth_token(expiry)
     return url_for('user.confirm_email', token=token, _external=True)
+
+
+def send_reset_password_link(user):
+    """
+    @brief Send an email containing a link to reset password
+    @param user The user object that requires a new password.
+    """
+    record_user('Request password reset', acted_on=user)
+    send_email(user.email,'Set new password',
+                   'mail/reset_password_email', full_name=user.full_name,
+                   link=generate_reset_password_url(user))
+
+
+def generate_reset_password_url(user):
+    expiry = time.time() +  300  # 5 minutes valid
+    token = user.generate_auth_token(expiry)
+    return url_for('user.set_password', token=token, _external=True)
