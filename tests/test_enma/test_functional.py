@@ -12,8 +12,87 @@ from enma.user.admin import establish_admin_defaults
 
 
 class TestLoggingIn:
+    """
+    Login work flow is as follow
+
+    .. actdiag::
+
+        actdiag {
+          begin -> portal -> login -> user -> end
+          login -> resent -> user
+          login -> error -> login
+          error -> end
+          resent -> confirm_email -> confirm -> end
+
+          lane control {
+              begin [shape = "beginpoint"];
+              end [shape = "endpoint"];
+          }
+
+          lane public {
+             label = "Public"
+             portal [label = "Portal of WebApp"];
+             login  [label = "Login"];
+             error  [label = "Login error (not active or wrong credentials)"];
+          }
+          lane user {
+             label = "User"
+             user [label = "Home of user and other pages"];
+          }
+          lane unconfirmed {
+             label = "email unconfirmed"
+             resent [label = "[Optional] email not confirmed"];
+             confirm [label = "Confirm email address"];
+          }
+          lane email {
+             label = "Email system"
+             confirm_email [label = "Request email address confirmation",
+                            shape = "mail"];
+          }
+        }
+
+    Pretty easy is the logout workflow:
+
+    A prerequisite is that a user is actually logged in.
+    If not a not authorized page will be shown.
+
+    .. actdiag::
+
+        actdiag {
+          beginpoint -> user -> logout -> portal -> endpoint
+
+          lane control {
+              beginpoint [shape = "beginpoint"];
+              endpoint [shape = "endpoint"];
+          }
+
+          lane public {
+             label = "Public"
+             portal [label = "Portal of WebApp"];
+          }
+          lane user {
+             label = "User"
+             user [label = "Home of user and other pages"];
+             logout [label = "Logout"];
+          }
+        }
+
+
+
+    Only local authentication is tested automatically.
+    Authentication using OpenId is covered by manual tests.
+
+    Note: it is possible to login, even if another user is already
+    logged in. The old user will be overwritten (in the session context)
+    by the new user. To do so it is required to enter the login url
+    manually. I.e. while a user is logged in there is no link available
+    that leads to the login page.
+    """
 
     def test_can_log_in_returns_200(self, user, testapp):
+        """
+        Test that User can successfully login (using local authentication)
+        """
         # Goes to login page
         res = testapp.get("/")
         # Clicks Login button
@@ -25,6 +104,9 @@ class TestLoggingIn:
         res = form.submit(name='up-login').follow()
 
     def test_sees_alert_on_log_out(self, user, testapp):
+        """
+        Test that a user who is logged in, can logout.
+        """
         # Goes to login page
         res = testapp.get("/")
         # Clicks Login button
@@ -39,6 +121,9 @@ class TestLoggingIn:
         assert 'You are logged out.' in res
 
     def test_sees_error_message_if_password_is_incorrect(self, user, testapp):
+        """
+        Test that a user fails to login if (s)he provides a wrong password
+        """
         # Goes to login page
         res = testapp.get(url_for("public.login"))
         form = res.forms['login_userpassword']
@@ -52,6 +137,9 @@ class TestLoggingIn:
         assert "Invalid password" in res
 
     def test_sees_error_message_if_username_doesnt_exist(self, user, testapp):
+        """
+        Test that a user cannot log in if (s)he provide a wrong username
+        """
         # Goes to login page
         res = testapp.get(url_for("public.login"))
         form = res.forms['login_userpassword']
@@ -65,6 +153,37 @@ class TestLoggingIn:
 
 
 class TestRegistering:
+    """
+    The registration workflow is as follow
+
+    .. actdiag::
+
+        actdiag {
+          portal -> register -> profile -> send -> confirm -> end
+          register -> activate -> end
+
+          lane webapp {
+             label = "Public"
+             portal [label = "Portal of WebApp"];
+             register  [label = "Register"];
+          }
+          lane user {
+             label = "User"
+             profile [label = "Edit profile data"];
+             confirm [label = "Confirm email address"];
+             end [label = "User is registered"];
+          }
+          lane email {
+             label = "Email-System"
+             send [label = "confirmation email"];
+          }
+          lane administrator {
+             label = "Administrator"
+             activate [label = "Activate account"];
+          }
+        }
+
+    """
 
     def test_can_register(self, user, testapp):
         old_count = len(User.query.all())
@@ -155,4 +274,48 @@ class TestEstablishAdminDefaults:
         retrieved = User.query.filter(User.username=='admin%local').first()
         assert retrieved 
         assert retrieved.role.name == 'SiteAdmin'
+
+
+class TestGetForgottenPassword:
+    """
+    Forgotten password work flow is as follow
+
+    .. actdiag::
+
+        actdiag {
+          begin -> portal -> login -> reset -> end
+          reset -> pwd_email -> setpwd -> end
+
+          lane control {
+              begin [shape = "beginpoint"];
+              end [shape = "endpoint"];
+          }
+
+          lane public {
+             label = "Public"
+             portal [label = "Portal of WebApp"];
+             login  [label = "Login"];
+             reset  [label = "Forgotten password"];
+          }
+          lane user {
+             label = "User"
+             setpwd [label = "Set new password"];
+          }
+          lane email {
+             label = "Email system"
+             pwd_email [label = "Password change access token",
+                            shape = "mail"];
+          }
+        }
+
+    This workflow only makes sense if the user is locally registered
+    and has actually forgotten his password but remembers the username.
+    """
+    def test_reset_passwd(self, db):
+        """
+        Test if the user can reset his/her password.
+        """
+        #@todo
+        pass
+
 

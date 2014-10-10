@@ -21,6 +21,9 @@ Contents
 
    readme
    installation
+   development/*
+   reference/*
+   tests/*
    usage
    contributing
    authors
