@@ -32,16 +32,25 @@ class Config(object):
 
 
 class ProdConfig(Config):
-    """Production configuration."""
+    """Production configuration. -  aligned to openshift """
     ENV = 'prod'
     DEBUG = False
-    
-    DB_USER = os_env['OPENSHIFT_POSTGRESQL_DB_USERNAME']
-    DB_PASSWORD = os_env['OPENSHIFT_POSTGRESQL_DB_PASSWORD']
-    DB_HOST = os_env['OPENSHIFT_POSTGRESQL_DB_HOST']
-    DB_PORT = os_env['OPENSHIFT_POSTGRESQL_DB_PORT']
+
+    DB_USER = 'enma'
+    if 'OPENSHIFT_POSTGRESQL_DB_USERNAME' in os_env.keys():
+        DB_USER = os_env['OPENSHIFT_POSTGRESQL_DB_USERNAME']
+    DB_PASSWORD = 'enma-password'
+    if 'OPENSHIFT_POSTGRESQL_DB_PASSWORD' in os_env.keys():
+        DB_PASSWORD = os_env['OPENSHIFT_POSTGRESQL_DB_PASSWORD']
+    DB_HOST = 'localhost'
+    if 'OPENSHIFT_POSTGRESQL_DB_HOST' in os_env.keys():
+        DB_HOST = os_env['OPENSHIFT_POSTGRESQL_DB_HOST']
+    DB_PORT = '5432'
+    if 'OPENSHIFT_POSTGRESQL_DB_PORT' in os_env.keys():
+        DB_PORT = os_env['OPENSHIFT_POSTGRESQL_DB_PORT']
     DB_NAME = 'enma'
-    SQLALCHEMY_DATABASE_URI = 'postgresql://' + DB_USER + ':' + DB_PASSWORD + '@' + DB_HOST + ':' + DB_PORT + '/' + DB_NAME
+    SQLALCHEMY_DATABASE_URI = 'postgresql://' + DB_USER + ':' + DB_PASSWORD \
+                              + '@' + DB_HOST + ':' + DB_PORT + '/' + DB_NAME
     DEBUG_TB_ENABLED = False  # Disable Debug toolbar
 
 

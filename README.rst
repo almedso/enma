@@ -1,72 +1,55 @@
-=============================
-Entitlement Management WebApp
-=============================
+======
+README
+======
 
-Manage entitlements of users
+**enma** is a abbreviation of Entitlement Management and comes along with
+a user management, activity recording. It is open source.
+Feel free to use and extend.
+
+License
+-------
+
+MIT type.
+
+Development
+-----------
+
+**enma** is a python app using **flask, jinja2, wtforms, bootrstrap,
+sqlachemy, alembric ** and other.
+
+The documentation is done the pythonic way using ReST format and shpinx tools.
+
+The development approach is test driven. **pytest, webtest** and **mocks, 
+patches**.
+
+Deployment
+----------
+
+Production grade deployment will happen via *wsgi* container.
+
+You need:
+* A wsgi enabled web server
+* A sql database that will hold your data 
+* An email account where you can send emails from
 
 
 Quickstart
 ----------
 
-First, set your app's secret key as an environment variable. For example, example add the following to ``.bashrc`` or ``.bash_profile``.
+Install the source as follow and build the documentation.
 
 .. code-block:: bash
 
-    export ENMA_SECRET = 'something-really-secret'
+   $ git clone https://github.com/volker_kempert/enma
+   $ cd enma
+   $ pip install -r requirements/dev.txt
+   $ python setup.py sphinx_build
+
+Read the installation chapter ad follow up the guidance
 
 
-Then run the following commands to bootstrap your environment.
+.. code-block:: bash
+
+   $ firefox build/sphinx/html/index.html
 
 
-::
-
-    git clone https://github.com/volker_kempert/enma
-    cd enma
-    pip install -r requirements/dev.txt
-    python manage.py db init
-    python manage.py db migrate
-    python manage.py db upgrade
-    python manage.py server
-
-
-
-Deployment
-----------
-
-In your production environment, make sure the ``ENMA_ENV`` environment variable is set to ``"prod"``.
-
-
-Shell
------
-
-To open the interactive shell, run ::
-
-    python manage.py shell
-
-By default, you will have access to ``app``, ``db``, and the ``User`` model.
-
-
-Running Tests
--------------
-
-To run all tests, run ::
-
-    python manage.py test
-
-
-Migrations
-----------
-
-Whenever a database migration needs to be made. Run the following commmands:
-::
-
-    python manage.py db migrate
-
-This will generate a new migration script. Then run:
-::
-
-    python manage.py db upgrade
-
-To apply the migration.
-
-For a full migration command reference, run ``python manage.py db --help``.
