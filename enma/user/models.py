@@ -55,7 +55,7 @@ class Role(SurrogatePK, Model):
     __tablename__ = 'roles'
     name = Column(db.String(80), unique=True, nullable=False)
     permissions = Column(db.Integer, default=0x00, nullable=False)
-    default = Column(db.Boolean, default=False, unique=False, nullable=True)
+    default = Column(db.Boolean, default=False, unique=False, nullable=False)
     users = relationship('User', backref='role', lazy='dynamic')
 
     def __init__(self, *cargs, **kwargs):
@@ -80,13 +80,14 @@ class Role(SurrogatePK, Model):
                 'SiteAdmin' : (Permission.ADMINISTRATOR, False )  # super admin
                 }
         if admin:  # add just another role
-            roles['Admin'] = (Permission.CREATE_USER | Permission.UPDATE_USER |
+            roles['Admin'] = ( (Permission.CREATE_USER | Permission.UPDATE_USER |
                             Permission.READ_USER | Permission.DELETE_USER,
-                            False),
+                            False) )
 
         for r in roles:
             role = Role.query.filter_by(name=r).first()
             if role is None:
+
                 role = Role(name=r)
             role.permissions = roles[r][0]
             role.default = roles[r][1]
@@ -138,7 +139,6 @@ class User(UserMixin, SurrogatePK, Model):
     password = Column(db.String(128), nullable=True)
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=dt.datetime.utcnow)
-    confirmed = db.Column(db.Boolean, default=False)
 
     first_name = Column(db.String(40), nullable=True)
     last_name = Column(db.String(40), nullable=True)
@@ -193,7 +193,6 @@ class User(UserMixin, SurrogatePK, Model):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
-            print 'data: ', str(data)
         except:
             return None
         return User.query.filter_by(username=data).first()
