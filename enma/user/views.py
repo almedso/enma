@@ -25,8 +25,6 @@ blueprint = Blueprint("user", __name__, url_prefix='/users',
 @blueprint.route("/")
 @login_required
 def home():
-    current_app.logger.error('token called')
-
     return render_template("users/home.html")
 
 @blueprint.route("/members")
@@ -129,6 +127,7 @@ def edit(name):
 
 
 @blueprint.route("/admin/<name>",  methods=["GET", "POST"])
+@permission_required(Permission.UPDATE_USER)
 @login_required
 def admin(name):
     user = User.query.filter_by(id=name).first()
@@ -163,7 +162,7 @@ def password():
     Changing the password is only supported for the current user.
     """
 
-    chpwd_form = ChangePasswordForm()
+    chpwd_form = ChangePasswordForm(current_user)
     if chpwd_form.setpwd.data:
         if chpwd_form.validate():
             current_user.set_password(chpwd_form.password.data)
@@ -173,8 +172,6 @@ def password():
             flash('Your password has been updated', 'info')
         else:
             flash_errors(chpwd_form)
-    chpwd_form.update_data(current_user)
-
     return render_template("users/password.html", chpwd_form=chpwd_form)
 
 

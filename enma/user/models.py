@@ -224,6 +224,14 @@ class User(UserMixin, SurrogatePK, Model):
         """
         return self.can(Permission.ADMINISTRATOR)
 
+    def is_locally_authenticated(self):
+        """ Check if the user authenticates locally (using the password)
+
+        Returns:
+            Boolean: True if local authentication method is chosen
+        """
+        return 'local' == self.auth_provider
+
     def set_role(self, name):
         """ Assigns a new role to the user
 
@@ -274,3 +282,10 @@ class AnonymousUser(AnonymousUserMixin):
             Boolean: Always false
         """
         return False
+
+    def is_locally_authenticated(self):
+        """ Check if the user is locally authenticated
+
+        Returns:
+            Boolean: Always false
+        """

@@ -72,6 +72,7 @@ class TestUser:
         db.session.commit()
         assert None ==  User.verify_auth_token(t) # expired
 
+    @pytest.mark.skipif("True", reason="Runs to long")
     def test_auth_token_expiry(self, db):
         u1 = User(username='u1', email='u1@mail.org')
         u1.save()
@@ -113,6 +114,12 @@ class TestUser:
         assert u.role.name == 'SiteAdmin'
         assert u.is_administrator()
 
+    def test_is_locally_authenticated(self):
+        u = User(username='a%local', email='a@foo.org')
+        assert u.is_locally_authenticated()
+        u.username = 'a%not-set'
+        assert not u.is_locally_authenticated()
+
 
 @pytest.mark.usefixtures('db')
 class TestAnonymousUser:
@@ -130,6 +137,9 @@ class TestAnonymousUser:
         u = AnonymousUser()
         assert not u.is_administrator()
 
+    def test_is_locally_authenticated(self):
+        u = AnonymousUser()
+        assert not u.is_locally_authenticated()
 
 @pytest.mark.usefixtures('db')
 class TestRole:

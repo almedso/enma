@@ -22,7 +22,7 @@ class Config(object):
     MAIL_USE_SSL = False
     if 'MAIL_USE_SSL' in os_env.keys():
         MAIL_USE_SSL = True
-    MAIL_USE_TLS = False
+    MAIL_USE_TLS = True
     if 'MAIL_USE_TLS' in os_env.keys():
         MAIL_USE_TLS = True
     MAIL_USERNAME = os_env['MAIL_USERNAME']
@@ -68,8 +68,17 @@ class DevConfig(Config):
 
 
 class TestConfig(Config):
-    TESTING = True  # also suppresses sending emails
+    # suppresses evaluation login_required decorator
+    #  also suppresses sending emails
+    TESTING = True
     DEBUG = True
+    MAIL_SERVER = 'localhost'
+    MAIL_PORT = 25
+    MAIL_USE_SSL = False
+    MAIL_USE_TLS = False
+    MAIL_USERNAME = None
+    MAIL_PASSWORD = None
+    MAIL_DEFAULT_SENDER = 'test@test.org'
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
     BCRYPT_LOG_ROUNDS = 1  # For faster tests
     WTF_CSRF_ENABLED = False  # Allows form testing

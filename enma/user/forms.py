@@ -63,7 +63,6 @@ class DeleteForm(Form):
 
     def __init__(self, user=None, *args, **kwargs):
         super(DeleteForm, self).__init__(*args, **kwargs)
-        print user
         if user:
             self.username.data = user.username
 
@@ -77,7 +76,6 @@ class DeleteForm(Form):
 
 
 class ChangePasswordForm(Form):
-    username = HiddenField('username',)
     oldpassword = PasswordField('Old Password',
                         validators=[DataRequired(), Length(min=6, max=40)])
     password = PasswordField('Password',
@@ -87,21 +85,16 @@ class ChangePasswordForm(Form):
                                           message='Passwords must match')])
     setpwd = SubmitField('Set Password')
 
-    def update_data(self, user):
-        self.username.data = user.username
+    def __init__(self, user=None, *args, **kwargs):
+        super(ChangePasswordForm, self).__init__(*args, **kwargs)
+        self.user = user
 
     def validate(self):
-        flash('validate chpwd called', 'info')
-
         initial_validation = super(ChangePasswordForm, self).validate()
         if not initial_validation:
             return False
-        user = User.query.filter_by(username=self.username.data).first()
-        if user:
-            self.username.errors.append("User does not exist")
-            return False
-        if not user.check_password(self.oldpassword.data):
-            self.email.errors.append("Old password is wrong")
+        if not self.user.check_password(self.oldpassword.data):
+            self.oldpassword.errors.append("Old password is wrong")
             return False
         return True
 
@@ -124,7 +117,7 @@ class UserAdminForm(Form):
 
     def update_data(self, user=None):
         if user:
-            self.username.data = user.username
+            self.username.data = user.nickname
             self.email.data = user.email
             self.auth_provider.data = user.auth_provider
             self.created_at.data = user.created_at

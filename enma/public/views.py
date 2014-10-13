@@ -180,7 +180,6 @@ def register():
 
 
 @blueprint.route('/forgotten/',  methods=['GET', 'POST'])
-@oid.loginhandler
 def forgotten_password():
     form = RequestPasswordChangeForm(request.form)
     if request.method == 'POST':
