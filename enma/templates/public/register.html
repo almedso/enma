@@ -2,52 +2,23 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<script type="text/javascript">
-function set_openid(openid, pr)
-{
-    u = openid.search('<username>')
-    if (u != -1) {
-        // openid requires username
-        user = prompt('Enter your ' + pr + ' username:')
-        openid = openid.substr(0, u) + user
-    }
-    provider = document.getElementById("oid-openid");
-    provider.value = openid;
-    document.login_oid.submit();
-}
-</script>
-
 <div class="container-narrow">
   <h1>Register</h1>
 
-    <form id="register_oid" name="login_oid" method="POST" class="form">
-      {{ form_oid.csrf_token }}
+    <h2>Choose your remote authentication provider  to register</h2>
 
-      <h2>Choose your OpenID provider to register</h2>
-
-        <ul class="nav nav-pills">
-        {% for pr in form_oid.providers %}
-        <li>
-        <a href="javascript:set_openid('{{pr.url}}', '{{pr.name}}');">
-             {{pr.text|safe}} </a> 
-        </li>
+    <p>
+      <ul class="nav nav-pills">
+        {% for pr in oauth2_providers %}
+          <li><a href="{{ url_for(pr.url_for) }}"> {{ pr.name |safe }} </a></li>
         {% endfor %}
-        </ul>
+      </ul>
 
-        <p> Is your favorite provider not among the listed providers, 
-        feel free to enter the URL of your preferred OpenId provider. </p>
-
-        <p><div class="row">
-        <div class="col-xs-10">
-        {{ form_oid.openid(size=60, class_="form-control") }}
-        </div><div class="col-xs-1">
-        {{ form_oid.go(class="btn btn-default") }}
-        </div>
-        </div></p>
-    </form>
+    </p>
 
     <h2>Or register locally</h2>
 
+    <p>
     <form id="register_userpassword" method="POST" class="form">
       {{ form_up.csrf_token }}
 
@@ -66,6 +37,7 @@ function set_openid(openid, pr)
       {{ form_up.register(class="btn btn-default") }}
       </div></p>
     </form>
+    </p>
 
 </div>
 {% endblock %}

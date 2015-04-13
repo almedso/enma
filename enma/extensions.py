@@ -24,8 +24,8 @@ debug_toolbar = DebugToolbarExtension()
 from flask.ext.httpauth import HTTPBasicAuth
 auth = HTTPBasicAuth()
 
-from flask.ext.openid import OpenID
-oid = OpenID()
-
 from flask.ext.mail import Mail
 mail = Mail()
+
+from flask_oauthlib.client import OAuth
+oauth = OAuth()

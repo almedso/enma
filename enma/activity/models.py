@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+""" Data and domain model for activities """
 import datetime as dt
 
 from enma.database import (
@@ -64,12 +65,16 @@ class Activity(SurrogatePK, Model):
 
 
 def record(description, category=EMPTY, acted_on=None):
-    """
-    @brief General recording of an business relevant activity
+    """ General recording of an business relevant activity
 
     Determines actor and host automatically; 
     Transforms acted_on to a string (if given)
     Writes to the activity table
+
+    Args:
+        description (str): The description
+        category (str): The category to record - fixed set of values only
+        acted_on (str): Optional - the user or users data that is affected.
     """
     user = current_user  # get the current user
     acted_on_name = ''

@@ -24,7 +24,9 @@ import os
 
 # Get the project root dir, which is the parent dir of this
 cwd = os.getcwd()
+print "Project cdw: ", cwd
 project_root = os.path.dirname(cwd)
+print "Project root: ", project_root
 
 # Insert the project root dir as the first element in the PYTHONPATH.
 # This lets us ensure that the source package is imported, and that its
@@ -32,6 +34,7 @@ project_root = os.path.dirname(cwd)
 sys.path.insert(0, project_root)
 
 import enma
+import tests
 
 # -- General configuration ---------------------------------------------
 
@@ -40,7 +43,11 @@ import enma
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode',
+              'sphinxcontrib.actdiag', ]
+
+# Fontpath for actdiag (truetype font)
+actdiag_fontpath = '/usr/share/fonts/truetype/ipafont/ipagp.ttf'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

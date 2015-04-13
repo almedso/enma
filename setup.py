@@ -43,9 +43,9 @@ setup(
     zip_safe=False,
     keywords='entitlement management webapp',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 2.7',
     ],

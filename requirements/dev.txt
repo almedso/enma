@@ -9,3 +9,9 @@ factory-boy==2.4.0
 
 # Management script
 Flask-Script
+
+
+# Documentation
+Sphinx
+sphinxcontrib-actdiag
+sphinxcontrib-aafig
