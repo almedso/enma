@@ -29,26 +29,46 @@ def _make_context():
     """
     return {'app': app, 'db': db, 'User': User, 'Role': Role}
 
-@manager.command
-def test():
-    """Run the tests."""
-    import pytest
-    exit_code = pytest.main(['tests', '--verbose'])
-    return exit_code
 
 @manager.command
-def establish_admin():
+def test(slow=False, mail=False):
+    """Run the tests."""
+    import pytest
+    command_args = ['tests', '--verbose', '--cov-report', 'xml',
+                    '--cov', 'enma', '--junitxml', 'unittest.xml']
+    if mail:
+        command_args.append("--mail")
+    if slow:
+        command_args.append("--slow")
+    exit_code = pytest.main(command_args)
+    return exit_code
+
+
+@manager.command
+def set_initial_data():
+    """ Create or update all initial data.
+
+    The initial data is a set of Role definitions and
+    Software definitions.
+    """
+    Role.insert_roles()  # make sure we have all roles available
+
+
+@manager.command
+def set_admin(reset_password=False):
     """
     Create the admin user or reset the admin to factory defaults
-    I.e. the admin user password is set to 'admin' and the admin user
-    has the role 'SiteAdmin'.
+    I.e. the admin user has the role 'SiteAdmin'.
+    The password is (re-)set optionally to '_admin'
+
+    :param reset_password: if True the admin password will be reset to '_admin'
     """
-    establish_admin_defaults()
+    Role.insert_roles()  # make sure we have all roles available
+    establish_admin_defaults(reset_password=reset_password)
 
 manager.add_command('server', Server())
 manager.add_command('shell', Shell(make_context=_make_context))
 manager.add_command('db', MigrateCommand)
-manager.add_command("assets", ManageAssets(assets))
 
 
 if __name__ == '__main__':

@@ -40,7 +40,7 @@ class Permission:
     READ_ACTIVITY = 0x0100
     DELETE_ACTIVITY = 0x0200
 
-    ADMINISTRATOR = 0xFFFFFFFF
+    ADMINISTRATOR = 0x7FFFFFFF
 
 
 class Role(SurrogatePK, Model):
