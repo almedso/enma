@@ -11,9 +11,8 @@ At registration the (future) user has the choice to either:
 
 * use **Local Authentication**, by maintaining a **username**/password
   combination
-* use **OpenId Authentication**, whereby this site trusts that the openid
-  provider does a proper authentication. Advantage for the user: He/She does
-  not have to remember the account data of yet another account.
+* use **OAuth2 Authentication**, whereby this authentication provider
+  has to be configured (secret and id).
 
 Later on the user has to stick to this kind of authentication method.
 
@@ -60,7 +59,7 @@ Self-registration Workflow
     }
 
 At the *Register* page, the (future) user makes the decision to either use
-**Local Authentication** or **OpenId Authentication**.
+**Local Authentication** or **Remote Authentication**.
 
 Login Workflow
 --------------
@@ -147,7 +146,7 @@ Forgotten Password Workflow
 
 Forgotten password work flow is as follow
 
- .. actdiag::
+.. actdiag::
 
      actdiag {
        begin -> portal -> login -> reset -> end
@@ -174,6 +173,7 @@ Forgotten password work flow is as follow
                          shape = "mail"];
        }
      }
+
 
 .. NOTE:: If the user does not remember his/her username, he/she needs to
    contact the administrator. (Resetting the password only if the email is

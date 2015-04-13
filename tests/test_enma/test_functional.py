@@ -100,7 +100,7 @@ class TestLoggingIn:
         res = testapp.get("/")
         # Clicks Login button
         res = res.click("Login")
-        form = res.forms['login_userpassword']
+        form = res.forms['login']
         form['up-username'] = user.username[:-6]
         form['up-password'] = 'myprecious'
         # Submits
@@ -114,7 +114,7 @@ class TestLoggingIn:
         res = testapp.get("/")
         # Clicks Login button
         res = res.click("Login")
-        form = res.forms['login_userpassword']
+        form = res.forms['login']
         form['up-username'] = user.username[:-6]
         form['up-password'] = 'myprecious'
         # Submits
@@ -129,7 +129,7 @@ class TestLoggingIn:
         """
         # Goes to login page
         res = testapp.get(url_for("public.login"))
-        form = res.forms['login_userpassword']
+        form = res.forms['login']
         form['up-username'] = user.username[:-6]
         form['up-password'] = 'wrong'
         # Submits
@@ -145,7 +145,7 @@ class TestLoggingIn:
         """
         # Goes to login page
         res = testapp.get(url_for("public.login"))
-        form = res.forms['login_userpassword']
+        form = res.forms['login']
         form['up-username'] = 'unknown'
         form['up-password'] = 'myprecious'
         # Submits

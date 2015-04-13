@@ -13,25 +13,6 @@ class ReadonlyTextField(TextField):
         return super(ReadonlyTextField, self).__call__(*args, **kwargs)
 
 
-## Open Id provider
-OPENID_PROVIDERS = [
-    {'name': 'Google', 'text': '<i class="fa fa-google-plus"></i> Google',
-      'url': 'https://www.google.com/accounts/o8/id'},
-    {'name': 'Facebook', 'text': '<i class="fa fa-facebook"></i> Facebook',
-      'url': 'facebook-openid.appspot.com/<username>'},
-    {'name': 'Yahoo', 'text': '<i class="fa fa-yahoo"></i> Yahoo',
-      'url': 'https://me.yahoo.com'},
-    {'name': 'Flickr', 'text': '<i class="fa fa-flickr"></i> Flickr',
-      'url': 'http://www.flickr.com/<username>'},
-    ]
-
-class LoginOpenIdForm(Form):
-
-    providers = OPENID_PROVIDERS
-    openid = TextField('OpenId Provider', validators=[URL])
-    go = SubmitField('Go', id='oid-go')
-
-
 class LoginUserPasswordForm(Form):
 
     username = TextField('Username', validators=[DataRequired()])

@@ -54,7 +54,7 @@ def logged_in(user, testapp):
     res = testapp.get("/")
     # Clicks Login button
     res = res.click("Login")
-    form = res.forms['login_userpassword']
+    form = res.forms['login']
     form['up-username'] = user.username[:-6]
     form['up-password'] = 'myprecious'
     # Submits

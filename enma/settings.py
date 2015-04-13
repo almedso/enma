@@ -30,6 +30,17 @@ class Config(object):
     MAIL_DEFAULT_SENDER = MAIL_USERNAME
     MAIL_SUBJECT_PREFIX = '[ENMA] '
 
+    # Oauth2 Authentication Provider and Switches
+    # if the respective *_ID is set the privider is switched on/off
+    # it is assumed that if *_ID exists a *_SECRET exists as well
+
+    GOOGLE_ID = None
+    if 'GOOGLE_CONSUMER_KEY' in os_env.keys():  # if set Google OAuth2 is supported
+        GOOGLE_CONSUMER_KEY = os_env['GOOGLE_CONSUMER_KEY']
+        GOOGLE_CONSUMER_SECRET = ''  # define the secret at least
+    if 'GOOGLE_CONSUMER_SECRET' in os_env.keys():
+        GOOGLE_CONSUMER_SECRET = os_env['GOOGLE_CONSUMER_SECRET']
+
 
 class ProdConfig(Config):
     """Production configuration. -  aligned to openshift """

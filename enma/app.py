@@ -8,12 +8,13 @@ from enma.extensions import (
     cache,
     db,
     login_manager,
-    oid,
     migrate,
+    oauth,
     debug_toolbar,
     mail,
 )
 from enma import public, user, activity, entitlement, rest
+from enma.oauth2 import register_oauth_blueprints
 
 
 def create_app(config_object=ProdConfig):
@@ -36,11 +37,10 @@ def register_extensions(app):
     cache.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
-    # oid.init_app(app, os.path.join(basedir, 'tmp')) # put the temp dir
-    oid.init_app(app)
     debug_toolbar.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
+    oauth.init_app(app)
     return None
 
 
@@ -50,6 +50,7 @@ def register_blueprints(app):
     app.register_blueprint(activity.views.blueprint)
     app.register_blueprint(entitlement.views.blueprint)
     app.register_blueprint(rest.api)
+    register_oauth_blueprints(app)
     return None
 
 

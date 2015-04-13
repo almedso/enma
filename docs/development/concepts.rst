@@ -24,14 +24,13 @@ On the web site the user has the choice between
 
 It is possible change the authentication method.
 
-OpenID Authentication
+OAuth2 Authentication
 ---------------------
 
-OpenID provider can be used for authentication.
-It is checked for 
+OAuth2 provider can be used for authentication.
+It is up to the local provider what is used as username.
 
-* nickname
-* if nickname is not available email is tried.
+* email is used as username for google connect
 
 The result is stored at username. 
 Also the openid_provider must fit.
