@@ -13,6 +13,39 @@ class Config(object):
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     CACHE_TYPE = 'simple'  # Can be "memcached", "redis", etc.
 
+    DB_NAME = 'enma'
+
+    DB_PROTOCOL = 'mysql://'
+    DB_USER = 'enma'
+    DB_PASSWORD = 'enma-password'
+    DB_HOST = 'localhost'
+    DB_PORT = '3306'
+
+    # check if postgres is configured
+    if 'OPENSHIFT_POSTGRESQL_DB_USERNAME' in os_env.keys():
+        DB_USER = os_env['OPENSHIFT_POSTGRESQL_DB_USERNAME']
+        DB_PROTOCOL = 'postgresql://'
+    if 'OPENSHIFT_POSTGRESQL_DB_PASSWORD' in os_env.keys():
+        DB_PASSWORD = os_env['OPENSHIFT_POSTGRESQL_DB_PASSWORD']
+    if 'OPENSHIFT_POSTGRESQL_DB_HOST' in os_env.keys():
+        DB_HOST = os_env['OPENSHIFT_POSTGRESQL_DB_HOST']
+    if 'OPENSHIFT_POSTGRESQL_DB_PORT' in os_env.keys():
+        DB_PORT = os_env['OPENSHIFT_POSTGRESQL_DB_PORT']
+
+    # overwrite if mysql is configured
+    if 'OPENSHIFT_MYSQL_DB_USERNAME' in os_env.keys():
+        DB_USER = os_env['OPENSHIFT_MYSQL_DB_USERNAME']
+        DB_PROTOCOL = 'mysql://'
+    if 'OPENSHIFT_MYSQL_DB_PASSWORD' in os_env.keys():
+        DB_PASSWORD = os_env['OPENSHIFT_MYSQL_DB_PASSWORD']
+    if 'OPENSHIFT_MYSQL_DB_HOST' in os_env.keys():
+        DB_HOST = os_env['OPENSHIFT_MYSQL_DB_HOST']
+    if 'OPENSHIFT_MYSQL_DB_PORT' in os_env.keys():
+        DB_PORT = os_env['OPENSHIFT_MYSQL_DB_PORT']
+
+    SQLALCHEMY_DATABASE_URI = DB_PROTOCOL + DB_USER + ':' + DB_PASSWORD \
+                              + '@' + DB_HOST + ':' + DB_PORT + '/' + DB_NAME
+
     MAIL_SERVER = 'localhost'
     if 'MAIL_SERVER' in os_env.keys():
         MAIL_SERVER = os_env['MAIL_SERVER']
@@ -47,21 +80,6 @@ class ProdConfig(Config):
     ENV = 'prod'
     DEBUG = False
 
-    DB_USER = 'enma'
-    if 'OPENSHIFT_POSTGRESQL_DB_USERNAME' in os_env.keys():
-        DB_USER = os_env['OPENSHIFT_POSTGRESQL_DB_USERNAME']
-    DB_PASSWORD = 'enma-password'
-    if 'OPENSHIFT_POSTGRESQL_DB_PASSWORD' in os_env.keys():
-        DB_PASSWORD = os_env['OPENSHIFT_POSTGRESQL_DB_PASSWORD']
-    DB_HOST = 'localhost'
-    if 'OPENSHIFT_POSTGRESQL_DB_HOST' in os_env.keys():
-        DB_HOST = os_env['OPENSHIFT_POSTGRESQL_DB_HOST']
-    DB_PORT = '5432'
-    if 'OPENSHIFT_POSTGRESQL_DB_PORT' in os_env.keys():
-        DB_PORT = os_env['OPENSHIFT_POSTGRESQL_DB_PORT']
-    DB_NAME = 'enma'
-    SQLALCHEMY_DATABASE_URI = 'postgresql://' + DB_USER + ':' + DB_PASSWORD \
-                              + '@' + DB_HOST + ':' + DB_PORT + '/' + DB_NAME
     DEBUG_TB_ENABLED = False  # Disable Debug toolbar
 
 
@@ -69,11 +87,13 @@ class DevConfig(Config):
     """Development configuration."""
     ENV = 'dev'
     DEBUG = True
-    DB_NAME = 'dev.db'
+
     # Put the db file in project root
-    DB_PATH = os.path.join(Config.PROJECT_ROOT, DB_NAME)
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(DB_PATH)
+    #DB_NAME = 'dev.db'
+    #DB_PATH = os.path.join(Config.PROJECT_ROOT, DB_NAME)
+    #SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(DB_PATH)
     DEBUG_TB_ENABLED = True
+
     ASSETS_DEBUG = True  # Don't bundle/minify static assets
     CACHE_TYPE = 'simple'  # Can be "memcached", "redis", etc.
 
